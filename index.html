@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>My Diet Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1A12;--surface:#122018;--card:#1A2E20;--border:#253D2C;--accent:#00A676;--text:#E8F5EE;--muted:#6B9E80;--ldl:#1a4a7a;--ldl-t:#7ec8f0;--hdl:#1a4a2a;--hdl-t:#7ef0a8;--tg:#2a1a5a;--tg-t:#c8a8f0;--all:#4a3010;--all-t:#f0c870;--top:#0a3a2a;--top-t:#00e6a0;}
+body.light{--bg:#F0F7F4;--surface:#FFFFFF;--card:#E6F2EC;--border:#A8CBB8;--accent:#007A56;--text:#0D1A12;--muted:#4A7A5E;--ldl:#daeeff;--ldl-t:#0C447C;--hdl:#daffec;--hdl-t:#27500A;--tg:#eeecff;--tg-t:#3C3489;--all:#fff3da;--all-t:#633806;--top:#d0fff0;--top-t:#005a3a;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-title{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent)}
+.hdr-sub{font-size:11px;color:var(--muted)}
+.theme-btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer}
+.main-tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:57px;z-index:99}
+.main-tabs::-webkit-scrollbar{display:none}
+.main-tab{flex:1;min-width:60px;padding:10px 4px;text-align:center;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.main-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.sub-tabs{background:var(--surface);padding:8px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border)}
+.sub-tabs::-webkit-scrollbar{display:none}
+.sub-tab{padding:5px 10px;border-radius:20px;border:1px solid var(--border);font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap;background:var(--card)}
+.sub-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.content{flex:1;padding:12px}
+.legend{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding:8px 10px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.lg{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.ld{width:8px;height:8px;border-radius:50%}
+.food-card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.food-card-header{padding:10px 12px 6px}
+.food-name{font-size:14px;font-weight:600;color:var(--text)}
+.food-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.tag-ldl{background:var(--ldl);color:var(--ldl-t)}
+.tag-hdl{background:var(--hdl);color:var(--hdl-t)}
+.tag-tg{background:var(--tg);color:var(--tg-t)}
+.tag-all{background:var(--all);color:var(--all-t)}
+.tag-top{background:var(--top);color:var(--top-t);font-weight:700}
+.food-benefit{padding:8px 10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.5}
+.food-benefit b{color:var(--text)}
+.food-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}
+.food-cell{padding:8px 10px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.food-cell.full{grid-column:1/-1;border-right:none;border-bottom:none}
+.food-cell:nth-child(even){border-right:none}
+.food-cell-lbl{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.food-cell-val{font-size:12px;color:var(--text);line-height:1.4}
+.when-pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.shop-sec{margin-bottom:16px}
+.shop-sec-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding:6px 2px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.shop-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer}
+.shop-item.ticked{opacity:.5}
+.shop-item.ticked .shop-name{text-decoration:line-through}
+.shop-check{width:20px;height:20px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:12px;font-weight:700;color:#fff}
+.shop-item.ticked .shop-check{background:var(--accent);border-color:var(--accent)}
+.shop-name{font-size:13px;font-weight:500;color:var(--text)}
+.shop-note{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;margin-left:6px}
+.b-g{background:#0a2e1a;color:#7ef0a8}
+.b-y{background:#2e2a0a;color:#f0e070}
+.b-r{background:#2e0a0a;color:#f07070}
+body.light .b-g{background:#d0ffe0;color:#1a5a2a}
+body.light .b-y{background:#fff8d0;color:#5a4a00}
+body.light .b-r{background:#ffd0d0;color:#5a0a0a}
+.reset-btn{width:100%;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;margin-bottom:12px}
+.add-row{display:flex;gap:8px;margin-bottom:12px}
+.add-input{flex:1;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px}
+.add-input::placeholder{color:var(--muted)}
+.add-btn{padding:8px 14px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.ai-note{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.5}
+.ai-note b{color:var(--accent)}
+.ai-msgs{min-height:260px;margin-bottom:8px}
+.ai-msg-user{display:flex;justify-content:flex-end;margin-bottom:10px}
+.ai-msg-user .bubble{background:var(--accent);color:#fff;padding:9px 13px;border-radius:14px 14px 2px 14px;max-width:85%;font-size:13px;line-height:1.5}
+.ai-msg-ai{margin-bottom:10px}
+.ai-msg-ai .bubble{background:var(--card);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:14px 14px 14px 2px;max-width:95%;font-size:13px;line-height:1.6}
+.ai-typing{color:var(--muted);font-size:12px;padding:6px 2px}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end;background:var(--surface);border-top:1px solid var(--border);padding:10px 12px;position:sticky;bottom:0}
+.ai-textarea{flex:1;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:none;min-height:40px;max-height:100px}
+.ai-textarea::placeholder{color:var(--muted)}
+.ai-send{padding:9px 14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.ai-photo{padding:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:16px;cursor:pointer}
+#photo-in{display:none}
+.photo-prev{max-width:120px;border-radius:8px;margin:6px 0;border:1px solid var(--border)}
+.no-key-msg{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 16px;text-align:center;margin:20px 0}
+.no-key-msg .nk-icon{font-size:32px;margin-bottom:10px}
+.no-key-msg .nk-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.no-key-msg .nk-sub{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.no-key-btn{padding:10px 20px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.settings-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.settings-sub{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.settings-input{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'Space Mono',monospace;margin-bottom:10px}
+.settings-input::placeholder{color:var(--muted);font-family:'Inter',sans-serif}
+.settings-save{padding:10px 20px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-weight:600;width:100%}
+.settings-clear{padding:10px 20px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;width:100%;margin-top:8px}
+.key-status{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:12px}
+.key-status.saved{background:#0a2e1a;color:#7ef0a8}
+.key-status.missing{background:#2e0a0a;color:#f07070}
+body.light .key-status.saved{background:#d0ffe0;color:#1a5a2a}
+body.light .key-status.missing{background:#ffd0d0;color:#5a0a0a}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--muted)}
+.info-val{color:var(--text);font-weight:500}
+.info-val.bad{color:#f07070}
+.info-val.warn{color:#f0c870}
+.info-val.good{color:#7ef0a8}
+</style>
+</head>
+<body id="body">
+<div id="app">
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">My Diet Guide</div>
+    <div class="hdr-sub">HDL · LDL · Triglycerides</div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">☀ / ☾</button>
+</div>
+
+<div class="main-tabs">
+  <div class="main-tab active" onclick="showMain('fruits',this)">🍎 Fruits</div>
+  <div class="main-tab" onclick="showMain('veg',this)">🥦 Veg</div>
+  <div class="main-tab" onclick="showMain('snacks',this)">🥜 Snacks</div>
+  <div class="main-tab" onclick="showMain('shopping',this)">🛒 Shopping</div>
+  <div class="main-tab" onclick="showMain('askai',this)">🤖 Ask AI</div>
+  <div class="main-tab" onclick="showMain('settings',this)">⚙ Settings</div>
+</div>
+
+<div id="pane-fruits">
+  <div class="sub-tabs" id="sub-fruits">
+    <div class="sub-tab active" onclick="filterFood('fruits','all',this)">All Fruits</div>
+    <div class="sub-tab" onclick="filterFood('fruits','top',this)">⭐ Top Picks</div>
+    <div class="sub-tab" onclick="filterFood('fruits','ldl',this)">LDL Fighters</div>
+    <div class="sub-tab" onclick="filterFood('fruits','hdl',this)">HDL Boosters</div>
+    <div class="sub-tab" onclick="filterFood('fruits','tg',this)">TG Busters</div>
+  </div>
+  <div class="content" id="content-fruits"></div>
+</div>
+
+<div id="pane-veg" style="display:none">
+  <div class="sub-tabs" id="sub-veg">
+    <div class="sub-tab active" onclick="filterFood('veg','all',this)">All Veg</div>
+    <div class="sub-tab" onclick="filterFood('veg','top',this)">⭐ Top Picks</div>
+    <div class="sub-tab" onclick="filterFood('veg','ldl',this)">LDL Fighters</div>
+    <div class="sub-tab" onclick="filterFood('veg','hdl',this)">HDL Boosters</div>
+    <div class="sub-tab" onclick="filterFood('veg','tg',this)">TG Busters</div>
+  </div>
+  <div class="content" id="content-veg"></div>
+</div>
+
+<div id="pane-snacks" style="display:none">
+  <div class="sub-tabs" id="sub-snacks">
+    <div class="sub-tab active" onclick="filterFood('snacks','all',this)">All Snacks</div>
+    <div class="sub-tab" onclick="filterFood('snacks','top',this)">⭐ Top Picks</div>
+    <div class="sub-tab" onclick="filterFood('snacks','ldl',this)">LDL Fighters</div>
+    <div class="sub-tab" onclick="filterFood('snacks','hdl',this)">HDL Boosters</div>
+    <div class="sub-tab" onclick="filterFood('snacks','tg',this)">TG Busters</div>
+  </div>
+  <div class="content" id="content-snacks"></div>
+</div>
+
+<div id="pane-shopping" style="display:none">
+  <div class="content" id="content-shopping"></div>
+</div>
+
+<div id="pane-askai" style="display:none">
+  <div class="content" id="content-askai">
+    <div class="ai-note"><b>Ask AI</b> — Type a diet question or upload a photo of a food label or meal. I will tell you if it helps or hurts your HDL, LDL and triglycerides.</div>
+    <div class="ai-msgs" id="ai-msgs"></div>
+  </div>
+  <div class="ai-input-row">
+    <button class="ai-photo" onclick="document.getElementById('photo-in').click()">📷</button>
+    <input type="file" id="photo-in" accept="image/*" onchange="handlePhoto(event)">
+    <textarea class="ai-textarea" id="ai-input" placeholder="Ask about any food..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"></textarea>
+    <button class="ai-send" onclick="sendAI()">Send</button>
+  </div>
+</div>
+
+<div id="pane-settings" style="display:none">
+  <div class="content">
+
+    <div class="settings-card">
+      <div class="settings-title">Your blood test results</div>
+      <div class="settings-sub">Tested 10 March 2026. 6-month target: retest September 2026.</div>
+      <div id="results-display"></div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">Gemini AI — API Key</div>
+      <div class="settings-sub">Your API key is saved only on this device. It is never in the app file and never uploaded to GitHub. To get your key, go to Google AI Studio and copy Gemini API Key 2.</div>
+      <div id="key-status-display"></div>
+      <input class="settings-input" type="password" id="key-input" placeholder="Paste your Gemini API Key 2 here..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="settings-save" onclick="saveKey()">Save API Key to this device</button>
+      <button class="settings-clear" onclick="clearKey()">Remove saved key</button>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">App information</div>
+      <div class="settings-sub">My Diet Guide — Version 1.0 · March 2026<br>Single-file app hosted on GitHub Pages.<br>All data stored on this device only.</div>
+      <hr class="divider">
+      <div class="info-row"><span class="info-label">GitHub repo</span><span class="info-val">kennethmak-ai/my-diet-guide</span></div>
+      <div class="info-row"><span class="info-label">Live URL</span><span class="info-val">kennethmak-ai.github.io/my-diet-guide</span></div>
+      <div class="info-row"><span class="info-label">AI model</span><span class="info-val">Gemini 2.0 Flash</span></div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+<script>
+var FRUITS=[
+{name:"Apple",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Pectin in skin forms a sticky gel in your gut that physically traps and removes LDL before it enters your blood. Low sugar — completely safe for triglycerides.",prep:"Eat with skin on. Slice into oats or eat whole.",freq:"Daily",when:"20 min before lunch/dinner, or in morning oats"},
+{name:"Pear",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Highest pectin content of any common fruit — more effective than apple at trapping LDL in the gut. Sorbitol slows sugar absorption, protecting triglycerides.",prep:"Eat with skin on. Alternate with apple daily.",freq:"Daily",when:"20 min before lunch/dinner, or in morning oats"},
+{name:"Avocado",cat:["top","hdl","ldl","tg"],impact:["all"],benefit:"Monounsaturated fat raises HDL while lowering LDL. Beta-sitosterol blocks cholesterol absorption. Only fruit that hits all 3 markers simultaneously.",prep:"Slice half alongside dinner. No cooking needed.",freq:"4–5x/week",when:"With dinner meal"},
+{name:"Kiwi",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Clinically proven: 2 kiwis daily for 8 weeks reduced triglycerides by 15% and LDL by 10%. Very high Vitamin C prevents LDL oxidation — stops LDL becoming most damaging form.",prep:"Eat 2 kiwis. Skin is edible — just rub off the fuzz.",freq:"Daily",when:"After lunch or after dinner"},
+{name:"Guava",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"High soluble fibre and lycopene. Asian studies show 8–10% LDL reduction in 4 weeks. Very low glycaemic index — safe for triglycerides. Cheap and available year-round in Singapore.",prep:"Eat with skin on. Pink-flesh guava preferred.",freq:"5x/week",when:"30 min before dinner, or between meals"},
+{name:"Strawberries / Berries",cat:["top","hdl","ldl"],impact:["ldl","hdl"],benefit:"Polyphenols and anthocyanins directly raise your HDL. Also reduce LDL oxidation — stops LDL becoming the most dangerous form that damages artery walls.",prep:"Handful raw or frozen (thawed). Add to morning oats.",freq:"Daily",when:"In morning oats, or after meals"},
+{name:"Blueberries",cat:["hdl","ldl"],impact:["ldl","hdl"],benefit:"Anthocyanins (blue pigment) directly raise HDL. Study: daily blueberries for 6 weeks raised HDL by 5%. Frozen blueberries from FairPrice work just as well as fresh.",prep:"Small handful in morning oats. Buy frozen — same benefit.",freq:"Daily",when:"In morning oats"},
+{name:"Orange / Mandarin",cat:["ldl"],impact:["ldl"],benefit:"Hesperidin flavonoid lowers LDL production in the liver. Pectin in the white pith traps LDL. Must eat whole fruit — juicing removes all fibre and all benefit.",prep:"Eat whole fruit including pith. Never drink orange juice.",freq:"Daily",when:"After lunch as dessert"},
+{name:"Red / Purple Grapes",cat:["hdl"],impact:["hdl"],benefit:"Resveratrol in the skin raises HDL and reduces LDL oxidation. Red and purple grapes are far more potent than green. Eating with seeds gives maximum benefit.",prep:"Small bunch. Eat with seeds. Never drink grape juice.",freq:"3–4x/week",when:"Afternoon snack"},
+{name:"Papaya",cat:["tg","ldl"],impact:["tg","ldl"],benefit:"Papain enzyme improves fat digestion — less fat gets stored as triglycerides. Beta-carotene reduces LDL oxidation. Cheap and available at wet markets year-round.",prep:"Half cup cubed. No added sugar. Eat as dessert.",freq:"4–5x/week",when:"After dinner as dessert"},
+{name:"Watermelon",cat:["tg"],impact:["tg"],benefit:"Lycopene and citrulline reduce triglyceride production in the liver and improve how the body clears fat from blood after meals.",prep:"2 slices only — control the portion. No sugar.",freq:"3–4x/week",when:"Afternoon snack (3–4pm, before PHV shift)"},
+{name:"Lemon / Lime",cat:["ldl"],impact:["ldl"],benefit:"D-limonene in the peel inhibits liver cholesterol production. Works gradually and consistently over 6–8 weeks. Also improves digestion and fat processing.",prep:"Squeeze half into warm water every morning. Or squeeze over fish.",freq:"Daily",when:"Morning — with your psyllium husk water"},
+];
+
+var VEGS=[
+{name:"Broccoli",cat:["top","ldl","hdl","tg"],impact:["all"],benefit:"Sulforaphane inhibits same liver enzyme as statin drugs. Kaempferol fibre traps LDL in gut. Chromium reduces triglycerides. Vitamin K supports HDL function. Hits all 3 markers.",prep:"Steam or blanch 4 min only. Do not overcook — sulforaphane is destroyed by heat. Stir-fry with garlic, minimal canola oil.",freq:"4x/week",when:"With lunch or dinner"},
+{name:"Kai Lan (芥兰)",cat:["top","ldl","hdl"],impact:["ldl","hdl"],benefit:"Glucosinolates reduce LDL synthesis in liver. Lutein and zeaxanthin prevent LDL oxidation. Bile acid binding capacity rivals oats gram for gram. Most practical daily green in Singapore.",prep:"Stir-fry with garlic and minimal oil. Ask hawker uncle: 少油 (less oil).",freq:"Daily",when:"With every lunch and dinner"},
+{name:"Ladies Fingers / Okra",cat:["top","ldl"],impact:["ldl"],benefit:"The sticky slime when you cut it is mucilage — a soluble fibre gel exceptionally effective at binding and removing LDL from the gut. Same mechanism as your psyllium husk supplement.",prep:"Blanch 3 min only, or steam. Do not overcook — mucilage breaks down. Add to soups last minute.",freq:"4x/week",when:"With lunch or dinner"},
+{name:"Brinjal / Eggplant",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Nasunin in the skin prevents LDL oxidation. Chlorogenic acid reduces fat absorption from gut. High soluble fibre traps LDL. Purple colour = anthocyanins, same as blueberries.",prep:"Keep skin on always — never peel. Steam, grill, or light stir-fry.",freq:"3x/week",when:"With lunch or dinner"},
+{name:"Bittergourd (苦瓜)",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Charantin mimics insulin action — directly reduces blood sugar and triglyceride production. Activates fat-burning enzyme in the liver. The bitterness IS the medicine — do not remove it.",prep:"Slice thin, blanch 2 min, stir-fry with tofu or eggs and garlic. Available at yong tau foo.",freq:"3x/week",when:"With lunch or dinner"},
+{name:"Garlic (蒜头)",cat:["ldl"],impact:["ldl"],benefit:"Allicin inhibits HMG-CoA reductase — the exact same enzyme targeted by statin medications. CRITICAL: crush garlic and wait 10 full minutes before cooking to allow allicin to fully form.",prep:"Crush 3–4 cloves, wait 10 minutes, then add to wok. Use in every stir-fry.",freq:"Daily",when:"In every cooked meal"},
+{name:"Red Onion",cat:["ldl","hdl"],impact:["ldl","hdl"],benefit:"Quercetin (red pigment) reduces LDL production AND raises HDL simultaneously. Contains 4x more quercetin than white onion. Raw is significantly more potent than cooked.",prep:"Slice raw into rice bowls and alongside fish. Red preferred over white onion.",freq:"Daily",when:"Raw alongside meals"},
+{name:"Spinach (菠菜)",cat:["ldl"],impact:["ldl"],benefit:"Lutein prevents LDL oxidation and artery wall damage. Thylakoids slow fat absorption after meals. High folate reduces homocysteine — a compound that makes arteries more vulnerable to LDL plaque.",prep:"Blanch briefly or stir-fry with garlic. Can also eat raw in rice bowls.",freq:"3–4x/week",when:"With lunch or dinner"},
+{name:"Tomato (番茄)",cat:["ldl","tg"],impact:["ldl","tg"],benefit:"Lycopene (red pigment) is one of nature's most powerful LDL oxidation inhibitors. Cooked tomato releases 3x more lycopene than raw. Your sardine-tomato-tofu dish uses this perfectly.",prep:"Cook in stir-fries and soups for maximum lycopene. Also eat raw alongside meals.",freq:"Daily",when:"In cooked meals or raw with meals"},
+{name:"Capsicum / Bell Pepper (Red)",cat:["ldl"],impact:["ldl"],benefit:"Highest Vitamin C content of any vegetable — protects LDL from oxidation. Capsanthin (red pigment) reduces LDL similarly to lycopene in tomatoes. Red is far more potent than green.",prep:"Eat raw as a snack or add to stir-fries. Red preferred over green.",freq:"3–4x/week",when:"Raw snack, or with meals"},
+{name:"Dark Leafy Greens (Bai Cai, Chye Sim)",cat:["hdl","ldl"],impact:["ldl","hdl"],benefit:"Vitamin K2 activates proteins that make HDL travel through the bloodstream more efficiently — your garbage trucks run faster. Magnesium directly supports HDL production in the liver.",prep:"Stir-fry with garlic, minimal oil. Any dark green works: bai cai, chye sim, kangkong.",freq:"Daily — every meal",when:"With every lunch and dinner"},
+{name:"Edamame (毛豆)",cat:["hdl","ldl"],impact:["ldl","hdl"],benefit:"Soy isoflavones directly stimulate HDL production in the liver and reduce LDL simultaneously. Whole bean is more effective than tofu or soy milk as fibre and protein are fully intact.",prep:"Boil frozen edamame 5 min. Light salt. Perfect PHV break snack — easy, no mess.",freq:"4–5x/week",when:"Snack or side dish with meal"},
+{name:"Purple Cabbage",cat:["hdl","ldl"],impact:["ldl","hdl"],benefit:"Anthocyanins (purple pigment) raise HDL — same compound as blueberries. Contains more anthocyanins per gram than almost any common vegetable. Raw retains far more than cooked.",prep:"Shred raw into rice bowls. Quick pickle with rice vinegar as a side dish.",freq:"3–4x/week",when:"Raw with meals"},
+{name:"Cucumber (黄瓜)",cat:["tg"],impact:["tg"],benefit:"High water content dilutes blood triglyceride concentration after meals. Cucurbitacins reduce fat absorption from the gut. Eating before meals significantly reduces post-meal triglyceride spikes.",prep:"Slice half with skin on. Eat before or with every meal. Zero preparation needed.",freq:"Daily",when:"20 min before meal, or with meal"},
+{name:"Long Beans / French Beans",cat:["tg","ldl"],impact:["ldl","tg"],benefit:"Resistant starch and soluble fibre slow carbohydrate release — prevents blood sugar spikes that drive triglyceride production. Found in thunder tea rice (lei cha) — one of your best hawker choices.",prep:"Stir-fry with garlic and tempeh. Add to soups. Quick 4–5 min cook.",freq:"3–4x/week",when:"With lunch or dinner"},
+{name:"Carrot (胡萝卜)",cat:["tg","ldl"],impact:["ldl","tg"],benefit:"Pectin (soluble fibre) forms a gel that traps LDL in the gut — same mechanism as oats and apples. Falcarinol reduces fat absorption, directly lowering post-meal triglycerides.",prep:"Eat raw sticks before meals to pre-load the gut. Also add to soups and stir-fries.",freq:"Daily",when:"Raw: 20 min before meal. Cooked: with meal"},
+{name:"Shiitake Mushroom (香菇)",cat:["tg","ldl"],impact:["ldl","tg"],benefit:"Eritadenine suppresses liver cholesterol production — similar to statin drugs. Beta-glucan (same as oats) traps LDL. Lentinan reduces triglyceride synthesis. Dried shiitake is more potent than fresh.",prep:"Add to barley-millet soup. Stir-fry with tofu. Use soaking water from dried shiitake in soups.",freq:"3–4x/week",when:"With lunch or dinner"},
+{name:"Ginger (姜)",cat:["tg","ldl"],impact:["ldl","tg"],benefit:"Gingerols reduce VLDL production in liver — the precursor to both LDL and triglycerides. Clinical trials show 10–15% triglyceride reduction over 12 weeks. Already in your steamed fish every time.",prep:"Add generously to all cooking. Brew ginger tea: boil sliced ginger 10 min, no sugar.",freq:"Daily",when:"In all cooked meals and morning tea"},
+{name:"Asparagus (芦笋)",cat:["hdl"],impact:["hdl"],benefit:"Saponins specifically stimulate HDL production while simultaneously blocking cholesterol absorption. High folate and chromium improve fat metabolism. A premium weekly HDL-boosting choice.",prep:"Steam or grill 5 min. Drizzle with olive oil and squeeze of lemon.",freq:"1–2x/week",when:"With dinner"},
+];
+
+var SNACKS=[
+{name:"Psyllium Husk in Water",cat:["top","ldl"],impact:["ldl"],benefit:"Forms an extremely thick soluble fibre gel in the gut — one of the most potent LDL trappers available. Clinically proven to lower LDL by 5–10% on its own when taken daily.",prep:"1 tsp stirred into a full glass of water. Drink immediately before the gel thickens.",freq:"Daily — every morning",when:"FIRST thing in the morning, before breakfast"},
+{name:"Walnuts (5–6 pieces)",cat:["top","ldl","hdl","tg"],impact:["all"],benefit:"Omega-3 (ALA) lowers triglycerides. Monounsaturated fat raises HDL. Phytosterols block LDL absorption from gut. One of very few snacks that hits all 3 markers simultaneously.",prep:"Raw, unsalted only. Small handful. Never buy roasted in oil.",freq:"Daily",when:"With morning oats, or snack between meals"},
+{name:"Chia Seeds (1 tsp)",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Omega-3 and soluble fibre together lower LDL and triglycerides simultaneously. The gel-forming fibre traps LDL like a sticky net in the gut. One of the easiest daily add-ins.",prep:"Stir 1 tsp into oats, soy milk, or water. Zero prep needed.",freq:"Daily",when:"In morning oats every day"},
+{name:"Almonds (10–12 pieces)",cat:["ldl","hdl"],impact:["ldl","hdl"],benefit:"Monounsaturated fat and Vitamin E lower LDL and mildly raise HDL. The brown skin contains polyphenols that reduce LDL oxidation. Do not remove the brown skin.",prep:"Raw, unsalted, with skin on. Do not peel or buy blanched.",freq:"5x/week",when:"Afternoon snack, or paired with fruit"},
+{name:"Dark Chocolate 85%+ (2–3 squares)",cat:["hdl"],impact:["hdl"],benefit:"Flavonoids at 85%+ cocoa raise HDL and reduce LDL oxidation. Very low sugar at 85% cocoa. Satisfies your after-dinner sweet craving without spiking triglycerides.",prep:"Max 2–3 squares of Lindt 85% or higher. Not milk chocolate. Not 70%.",freq:"3–4x/week",when:"After dinner as dessert"},
+{name:"Quaker 5 Grains Green (Breakfast)",cat:["top","ldl","tg"],impact:["ldl","tg"],benefit:"Beta-glucan from oats, barley, and rye forms LDL-trapping gel. Highest fibre (3.9g). Lowest sugar (0.5g) of all 3 variants. Best choice for your triglycerides.",prep:"35g + Low Fat Omega milk + chia seeds + walnuts + cinnamon + sliced apple or pear + berries. No sugar.",freq:"Daily — every morning",when:"Breakfast 7–8am"},
+{name:"Quaker 5 Grains Black (Breakfast)",cat:["top","ldl","hdl"],impact:["ldl","hdl"],benefit:"Beta-glucan traps LDL. Highest magnesium (100mg/serving) of all 3 variants — magnesium deficiency directly causes low HDL. Black sesame anthocyanins reduce LDL oxidation.",prep:"Alternate with Green variant daily. Or mix half-half in same bowl.",freq:"Daily — alternate with Green",when:"Breakfast 7–8am"},
+{name:"Green Tea (no sugar)",cat:["ldl","tg"],impact:["ldl","tg"],benefit:"Catechins reduce cholesterol absorption in the gut and lower LDL production in the liver. 2–3 cups daily compounds the cholesterol-fighting effect throughout the day.",prep:"Brew loose leaf or bag. No sugar, no milk. Hot or cold.",freq:"Daily — 2–3 cups",when:"Between meals — morning and afternoon"},
+{name:"Cinnamon Powder (¼ tsp)",cat:["tg"],impact:["tg"],benefit:"Stabilises blood sugar after meals — directly reduces the amount of glucose that gets converted into triglycerides by the liver. Natural warm-sweet flavour so you do not miss sugar.",prep:"Sprinkle into morning oats. Zero preparation needed.",freq:"Daily",when:"In morning oats every day"},
+{name:"Unsweetened Soy Milk (1 cup)",cat:["ldl"],impact:["ldl"],benefit:"Plant sterols physically block cholesterol absorption in the gut. Soy isoflavones lower LDL production in the liver. Use to replace full-fat milk in all coffee and oats.",prep:"Vitasoy or Marigold Unsweetened only. Use in coffee and oats every day.",freq:"Daily",when:"In morning coffee and oats"},
+{name:"Lemon Warm Water",cat:["ldl"],impact:["ldl"],benefit:"D-limonene in lemon peel inhibits liver cholesterol production. Improves digestion and fat processing. Best taken first thing in the morning to kick-start the day.",prep:"Squeeze half lemon into a glass of warm water. No sugar. Drink before psyllium husk.",freq:"Daily",when:"First thing in morning, before psyllium husk"},
+{name:"Raw Carrot Sticks",cat:["ldl","tg"],impact:["ldl","tg"],benefit:"Pre-loading the gut with pectin gel before a meal means the LDL-trapping fibre is already waiting when dietary fat arrives. One of the easiest and cheapest daily habits.",prep:"Slice 1 carrot into sticks. Keep in fridge ready to grab. No dip needed.",freq:"Daily",when:"20–30 min before lunch or dinner"},
+{name:"Edamame (1 cup)",cat:["top","hdl","ldl"],impact:["ldl","hdl"],benefit:"Soy isoflavones directly stimulate HDL production. Plant sterols block LDL absorption. Most bioavailable form of soy. Perfect PHV driving break snack — easy to eat, no mess.",prep:"Boil frozen edamame 5 min. Light salt. Keep in a container for PHV breaks.",freq:"4–5x/week",when:"Anytime — snack between meals or PHV break"},
+];
+
+var SHOPPING=[
+{sec:"Approved Products",items:[
+{n:"Quaker Power of 5 Grains (Green)",note:"Highest fibre + lowest sugar. Best LDL variant.",b:"g"},
+{n:"Quaker Power of 5 Grains (Black)",note:"Best magnesium for HDL. Alternate with Green daily.",b:"g"},
+{n:"Magnolia Low Fat Hi-Cal Omega Milk",note:"Replace full-fat milk in all coffee and oats.",b:"g"},
+{n:"Ayam Brand Canned Fish",note:"1 can every 2 days. Drain sauce first. Omega-3.",b:"g"},
+{n:"Naturel Organic Hom Mali Brown Rice",note:"Mix 40% into rice cooker with millet and red cargo.",b:"g"},
+{n:"Golden Peony Red Cargo Rice",note:"Mix 30% into rice cooker blend. Adds anthocyanins.",b:"g"},
+{n:"Pasar Millet (小米 — yellow bag)",note:"Mix 20–30% into rice cooker. High fibre, lowers LDL.",b:"g"},
+{n:"Vitasoy / Marigold Unsweetened Soy Milk",note:"Daily drink and in oats. Plant sterols fight LDL.",b:"g"},
+]},
+{sec:"Fruits to Buy",items:[
+{n:"Apple (bag of 6–8)",note:"With skin on. Daily in oats or before meals.",b:"g"},
+{n:"Pear (4–5)",note:"Alternate with apple. Highest pectin of any fruit.",b:"g"},
+{n:"Avocado (3–4)",note:"Ripen on counter then fridge. Half daily with dinner.",b:"g"},
+{n:"Kiwi (bag of 6)",note:"Eat 2 daily. Skin is edible — rub off fuzz.",b:"g"},
+{n:"Guava (3–4)",note:"Pink flesh preferred. Afternoon snack.",b:"g"},
+{n:"Frozen Berries / Blueberries",note:"FairPrice frozen section. Same benefit as fresh.",b:"g"},
+{n:"Papaya (pre-cut portions)",note:"After dinner dessert. No added sugar.",b:"g"},
+{n:"Lemon (4–5)",note:"Half into morning water daily. Keeps 2 weeks.",b:"g"},
+{n:"Watermelon",note:"2 slices max only. Afternoon snack.",b:"y"},
+]},
+{sec:"Vegetables to Buy",items:[
+{n:"Kai lan (2–3 days supply)",note:"Daily staple at every meal. Stir-fry with garlic.",b:"g"},
+{n:"Broccoli (1 head)",note:"Steam 4 min only. Do not overcook.",b:"g"},
+{n:"Ladies fingers / Okra",note:"Blanch 3 min only. Do not overcook.",b:"g"},
+{n:"Brinjal (2–3 pieces)",note:"Keep skin on always. Never peel.",b:"g"},
+{n:"Bittergourd (2 pieces)",note:"Do not remove the bitterness — that is the medicine.",b:"g"},
+{n:"Cucumber (3–4)",note:"Slice raw daily before meals. Skin on.",b:"g"},
+{n:"Carrots (bag of 6)",note:"Raw sticks before meals daily.",b:"g"},
+{n:"Shiitake Mushrooms (dried pack)",note:"Lasts months. Use soaking water in soups too.",b:"g"},
+{n:"Spinach (1 bunch)",note:"Use within 2 days. Stir-fry or blanch.",b:"g"},
+{n:"Red Onion (4–5)",note:"Slice raw into every rice bowl.",b:"g"},
+{n:"Tomatoes (6)",note:"Cook daily in stir-fries for lycopene release.",b:"g"},
+{n:"Long beans",note:"Very cheap. Stir-fry with tempeh.",b:"g"},
+{n:"Purple Cabbage (half head)",note:"Shred raw. Keeps 1 week in fridge.",b:"g"},
+{n:"Edamame (frozen, 2 bags)",note:"Boil 5 min. Snack or side dish.",b:"g"},
+{n:"Ginger (large knob)",note:"Use in all cooking daily. Keeps 2–3 weeks.",b:"g"},
+{n:"Garlic (full bulb)",note:"Crush 10 min before cooking every single time.",b:"g"},
+]},
+{sec:"Pantry Staples",items:[
+{n:"Psyllium Husk",note:"1 tsp in water every morning. Health stores or Mustafa.",b:"g"},
+{n:"Chia Seeds (200g bag)",note:"1 tsp daily in oats.",b:"g"},
+{n:"Walnuts raw unsalted (200g)",note:"Daily handful. Never roasted in oil.",b:"g"},
+{n:"Almonds raw unsalted (200g)",note:"Keep skin on. Afternoon snack.",b:"g"},
+{n:"Cinnamon Powder (McCormick / Badia)",note:"In oats daily. FairPrice spice aisle.",b:"g"},
+{n:"Pearl Barley",note:"Cook with millet in soup. Lasts months.",b:"g"},
+{n:"Red Lentils",note:"Cheap, fast-cook. LDL-fighting soup in 30 min.",b:"g"},
+{n:"Olive Oil or Canola Oil (small bottle)",note:"Use sparingly. Small bottle only.",b:"g"},
+{n:"Lindt 85% Dark Chocolate",note:"2–3 squares max after dinner only.",b:"y"},
+{n:"Dried Tangerine Peel 陈皮",note:"Chinese medical hall. Add to green bean soup.",b:"g"},
+{n:"Tempeh",note:"Fermented soy. Stir-fry with long beans.",b:"g"},
+]},
+{sec:"Do NOT Buy",items:[
+{n:"Coconut oil / Lard / Butter",note:"Raises LDL directly and significantly.",b:"r"},
+{n:"Magnolia Full Fat Milk (yellow carton)",note:"Switch to Low Fat Omega (blue carton) only.",b:"r"},
+{n:"Sweetened soy milk (any brand)",note:"Buy unsweetened versions only.",b:"r"},
+{n:"Quaker 5 Grains RED variant",note:"High sugar 4.7g — spikes your triglycerides.",b:"r"},
+{n:"Pearl Sago",note:"Pure starch, zero fibre — direct triglyceride spike.",b:"r"},
+{n:"Sugary drinks / Milo sweetened / Bubble tea",note:"Number 1 cause of high triglycerides. Cut completely.",b:"r"},
+{n:"Processed meats / Luncheon meat / Sausages",note:"Raises LDL significantly.",b:"r"},
+{n:"Durian",note:"High saturated fat + high sugar. Hits all 3 bad markers.",b:"r"},
+]},
+];
+
+var RESULTS=[
+{label:"Total Cholesterol",val:"5.92 mmol/L",target:"Target: below 5.2",status:"warn"},
+{label:"HDL (Good)",val:"1.13 mmol/L",target:"Target: above 1.4",status:"bad"},
+{label:"LDL (Bad)",val:"4.01 mmol/L",target:"Target: below 2.6",status:"bad"},
+{label:"Chol/HDL Ratio",val:"5.24",target:"Target: below 4.5",status:"warn"},
+{label:"Triglycerides",val:"2.20 mmol/L",target:"Target: below 1.7",status:"warn"},
+];
+
+function impactHTML(impacts){
+  if(impacts.includes('all')) return '<span class="tag tag-all">LDL+HDL+TG</span>';
+  return impacts.map(function(i){
+    if(i==='ldl') return '<span class="tag tag-ldl">LDL ↓</span>';
+    if(i==='hdl') return '<span class="tag tag-hdl">HDL ↑</span>';
+    if(i==='tg')  return '<span class="tag tag-tg">TG ↓</span>';
+    return '';
+  }).join('');
+}
+
+function renderLegend(){
+  return '<div class="legend">'+
+    '<span class="lg"><span class="ld" style="background:#378ADD"></span>LDL ↓</span>'+
+    '<span class="lg"><span class="ld" style="background:#639922"></span>HDL ↑</span>'+
+    '<span class="lg"><span class="ld" style="background:#7F77DD"></span>TG ↓</span>'+
+    '<span class="lg"><span class="ld" style="background:#EF9F27"></span>All 3</span>'+
+    '</div>';
+}
+
+function renderCards(data,filter){
+  var filtered=data.filter(function(d){return filter==='all'||d.cat.indexOf(filter)>-1;});
+  if(!filtered.length) return '<div style="color:var(--muted);padding:24px;text-align:center;font-size:13px">No items in this category</div>';
+  return renderLegend()+filtered.map(function(d){
+    var isTop=d.cat.indexOf('top')>-1;
+    return '<div class="food-card">'+
+      '<div class="food-card-header">'+
+        '<div class="food-name">'+d.name+'</div>'+
+        '<div class="food-tags">'+(isTop?'<span class="tag tag-top">⭐ Top Pick</span>':'')+impactHTML(d.impact)+'</div>'+
+      '</div>'+
+      '<div class="food-benefit"><b>Why it works:</b> '+d.benefit+'</div>'+
+      '<div class="food-grid">'+
+        '<div class="food-cell"><div class="food-cell-lbl">How to prepare</div><div class="food-cell-val">'+d.prep+'</div></div>'+
+        '<div class="food-cell"><div class="food-cell-lbl">Times / week</div><div class="food-cell-val">'+d.freq+'</div></div>'+
+        '<div class="food-cell full"><div class="food-cell-lbl">When to eat</div><div class="food-cell-val"><span class="when-pill">'+d.when+'</span></div></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderShopping(){
+  var ticked=JSON.parse(localStorage.getItem('diet_shop')||'{}');
+  var html='<div class="add-row"><input class="add-input" id="custom-in" placeholder="Add your own item..." /><button class="add-btn" onclick="addCustom()">+ Add</button></div>';
+  html+='<button class="reset-btn" onclick="resetShop()">✕ Clear all ticked items</button>';
+  SHOPPING.forEach(function(sec){
+    html+='<div class="shop-sec"><div class="shop-sec-title">'+sec.sec+'</div>';
+    sec.items.forEach(function(item){
+      var key=sec.sec+'::'+item.n;
+      var ek=encodeURIComponent(key);
+      var t=!!ticked[key];
+      var bc=item.b==='g'?'b-g':item.b==='y'?'b-y':'b-r';
+      var bl=item.b==='g'?'BUY':item.b==='y'?'LIMIT':'AVOID';
+      html+='<div class="shop-item'+(t?' ticked':'')+'" onclick="toggleShop(\''+ek+'\')" id="si-'+ek+'">'+
+        '<div class="shop-check">'+(t?'✓':'')+'</div>'+
+        '<div><div class="shop-name">'+item.n+'<span class="badge '+bc+'">'+bl+'</span></div>'+
+        '<div class="shop-note">'+item.note+'</div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+  });
+  var customs=JSON.parse(localStorage.getItem('diet_customs')||'[]');
+  if(customs.length){
+    html+='<div class="shop-sec"><div class="shop-sec-title">My Custom Items</div>';
+    customs.forEach(function(n){
+      var key='custom::'+n;
+      var ek=encodeURIComponent(key);
+      var t=!!ticked[key];
+      html+='<div class="shop-item'+(t?' ticked':'')+'" onclick="toggleShop(\''+ek+'\')" id="si-'+ek+'">'+
+        '<div class="shop-check">'+(t?'✓':'')+'</div>'+
+        '<div><div class="shop-name">'+n+'</div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+  }
+  return html;
+}
+
+function toggleShop(ek){
+  var key=decodeURIComponent(ek);
+  var ticked=JSON.parse(localStorage.getItem('diet_shop')||'{}');
+  ticked[key]=!ticked[key];
+  localStorage.setItem('diet_shop',JSON.stringify(ticked));
+  var el=document.getElementById('si-'+ek);
+  if(el){el.classList.toggle('ticked',ticked[key]);el.querySelector('.shop-check').textContent=ticked[key]?'✓':'';}
+}
+
+function resetShop(){
+  localStorage.removeItem('diet_shop');
+  document.getElementById('content-shopping').innerHTML=renderShopping();
+}
+
+function addCustom(){
+  var inp=document.getElementById('custom-in');
+  var v=inp.value.trim();
+  if(!v) return;
+  var c=JSON.parse(localStorage.getItem('diet_customs')||'[]');
+  c.push(v);
+  localStorage.setItem('diet_customs',JSON.stringify(c));
+  inp.value='';
+  document.getElementById('content-shopping').innerHTML=renderShopping();
+}
+
+function filterFood(sec,filter,el){
+  var map={fruits:FRUITS,veg:VEGS,snacks:SNACKS};
+  document.getElementById('content-'+sec).innerHTML=renderCards(map[sec],filter);
+  document.getElementById('sub-'+sec).querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+}
+
+function showMain(tab,el){
+  ['fruits','veg','snacks','shopping','askai','settings'].forEach(function(t){
+    document.getElementById('pane-'+t).style.display='none';
+  });
+  document.getElementById('pane-'+tab).style.display='block';
+  document.querySelectorAll('.main-tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  if(tab==='shopping') document.getElementById('content-shopping').innerHTML=renderShopping();
+  if(tab==='settings') renderSettings();
+  if(tab==='askai') checkAIKey();
+}
+
+function toggleTheme(){
+  document.getElementById('body').classList.toggle('light');
+  localStorage.setItem('diet_theme',document.getElementById('body').classList.contains('light')?'light':'dark');
+}
+
+function renderSettings(){
+  var rd=document.getElementById('results-display');
+  rd.innerHTML=RESULTS.map(function(r){
+    return '<div class="info-row">'+
+      '<span class="info-label">'+r.label+'</span>'+
+      '<div style="text-align:right">'+
+        '<div class="info-val '+r.status+'">'+r.val+'</div>'+
+        '<div style="font-size:10px;color:var(--muted)">'+r.target+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  updateKeyStatus();
+}
+
+function updateKeyStatus(){
+  var kd=document.getElementById('key-status-display');
+  if(!kd) return;
+  var key=localStorage.getItem('diet_api_key')||'';
+  if(key){
+    kd.innerHTML='<div class="key-status saved">✓ API key saved on this device — Ask AI is ready to use</div>';
+  } else {
+    kd.innerHTML='<div class="key-status missing">✕ No API key saved — paste your Gemini API Key 2 below</div>';
+  }
+}
+
+function saveKey(){
+  var val=document.getElementById('key-input').value.trim();
+  if(!val){alert('Please paste your API key first.');return;}
+  localStorage.setItem('diet_api_key',val);
+  document.getElementById('key-input').value='';
+  updateKeyStatus();
+  alert('API key saved on this device. Ask AI is ready to use.');
+}
+
+function clearKey(){
+  if(!confirm('Remove the saved API key from this device?')) return;
+  localStorage.removeItem('diet_api_key');
+  updateKeyStatus();
+}
+
+function checkAIKey(){
+  var key=localStorage.getItem('diet_api_key')||'';
+  var msgs=document.getElementById('ai-msgs');
+  if(!key){
+    msgs.innerHTML='<div class="no-key-msg">'+
+      '<div class="nk-icon">🔑</div>'+
+      '<div class="nk-title">API Key not set</div>'+
+      '<div class="nk-sub">Go to Settings and paste your Gemini API Key 2 once. It saves on this device only and is never in the app file.</div>'+
+      '<button class="no-key-btn" onclick="goToSettings()">Go to Settings ⚙</button>'+
+    '</div>';
+  }
+}
+
+function goToSettings(){
+  showMain('settings', document.querySelectorAll('.main-tab')[5]);
+}
+
+var aiHistory=[];
+var pendingPhoto=null;
+var AI_SYS="You are a dietary advisor helping a 54-year-old male in Singapore manage his HDL cholesterol (currently 1.13 mmol/L, target above 1.4), LDL cholesterol (currently 4.01 mmol/L, target below 2.6) and triglycerides (currently 2.20 mmol/L, target below 1.7). He manages this through diet and exercise only — no medication. Give practical, specific advice about whether foods are suitable, what to eat more of, what to avoid, and simple cooking suggestions. Keep answers concise, warm, and easy to understand. Reference Singapore foods and hawker options where relevant. Do not give medical diagnoses.";
+
+function handlePhoto(event){
+  var file=event.target.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    pendingPhoto=e.target.result;
+    var img=document.createElement('img');
+    img.src=pendingPhoto;
+    img.style.cssText='max-width:120px;border-radius:8px;margin:6px 0;border:1px solid var(--border)';
+    var msgs=document.getElementById('ai-msgs');
+    msgs.appendChild(img);
+    msgs.scrollTop=msgs.scrollHeight;
+  };
+  reader.readAsDataURL(file);
+}
+
+function appendMsg(role,text){
+  var msgs=document.getElementById('ai-msgs');
+  var div=document.createElement('div');
+  div.className='ai-msg-'+role;
+  div.innerHTML='<div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function sendAI(){
+  var key=localStorage.getItem('diet_api_key')||'';
+  if(!key){
+    alert('Please go to Settings and save your Gemini API Key 2 first.');
+    return;
+  }
+  var input=document.getElementById('ai-input');
+  var text=input.value.trim();
+  if(!text&&!pendingPhoto) return;
+  appendMsg('user',text||'(Uploaded photo for analysis)');
+  input.value='';
+  var msgs=document.getElementById('ai-msgs');
+  var typing=document.createElement('div');
+  typing.className='ai-typing';
+  typing.id='ai-typing';
+  typing.textContent='Thinking...';
+  msgs.appendChild(typing);
+  msgs.scrollTop=msgs.scrollHeight;
+  var parts=[];
+  if(pendingPhoto){
+    var mt=pendingPhoto.includes('data:image/png')?'image/png':'image/jpeg';
+    parts.push({inlineData:{mimeType:mt,data:pendingPhoto.split(',')[1]}});
+  }
+  parts.push({text:text||'Please analyse this food image and tell me if it is suitable for my HDL, LDL and triglycerides condition.'});
+  pendingPhoto=null;
+  aiHistory.push({role:'user',parts:parts});
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({system_instruction:{parts:[{text:AI_SYS}]},contents:aiHistory,generationConfig:{maxOutputTokens:600,temperature:0.7}})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var t=document.getElementById('ai-typing');
+    if(t) t.remove();
+    var reply='';
+    try{reply=data.candidates[0].content.parts[0].text;}
+    catch(e){reply='Could not get a response. Please check your API key in Settings is correct and try again.';}
+    aiHistory.push({role:'model',parts:[{text:reply}]});
+    appendMsg('ai',reply);
+  })
+  .catch(function(){
+    var t=document.getElementById('ai-typing');
+    if(t) t.remove();
+    appendMsg('ai','Connection error. Please check your internet connection and try again.');
+  });
+}
+
+(function init(){
+  if(localStorage.getItem('diet_theme')==='light') document.getElementById('body').classList.add('light');
+  document.getElementById('content-fruits').innerHTML=renderCards(FRUITS,'all');
+  document.getElementById('content-veg').innerHTML=renderCards(VEGS,'all');
+  document.getElementById('content-snacks').innerHTML=renderCards(SNACKS,'all');
+})();
+</script>
+</body>
+</html>
